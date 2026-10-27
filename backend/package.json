@@ -1,0 +1,19 @@
+{
+  "name": "meubolso-backend",
+  "version": "1.0.0",
+  "description": "API de gestão de despesas pessoais do MeuBolso",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --env-file=.env --watch src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clerk/express": "^2.1.84",
+    "cors": "^2.8.6",
+    "pg": "^8.23.1"
+  }
+}
