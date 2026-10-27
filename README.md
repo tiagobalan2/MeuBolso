@@ -1,7 +1,7 @@
 # MeuBolso
 projeto de desenvolvimento de software
 
-# 💰 GranaControl
+# 💰 MeuBolso
 
 Sistema web de gestão de despesas pessoais desenvolvido para a disciplina
 de Projeto de Desenvolvimento de Software (Unifil).
