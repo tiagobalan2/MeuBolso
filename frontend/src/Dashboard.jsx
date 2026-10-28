@@ -14,7 +14,6 @@ function mesAtual() {
 }
 
 function formatarMes(mes) {
-  // "2026-10" → "outubro/2026"
   const [ano, m] = mes.split('-');
   const nomes = [
     'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
@@ -35,10 +34,7 @@ export default function Dashboard() {
     setErro('');
     try {
       const token = await getToken();
-      const data = await apiFetch(
-        `/api/dashboard/resumo?mes=${mes}`,
-        token
-      );
+      const data = await apiFetch(`/api/dashboard/resumo?mes=${mes}`, token);
       setResumo(data);
     } catch (e) {
       setErro(e.message);
@@ -52,6 +48,8 @@ export default function Dashboard() {
   }, [mes]);
 
   const maiorCategoria = resumo?.porCategoria?.[0];
+  const saldo = resumo?.saldo ?? 0;
+  const saldoPositivo = saldo >= 0;
 
   return (
     <div>
@@ -72,34 +70,72 @@ export default function Dashboard() {
 
       {resumo && (
         <>
+          {/* Cards principais */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
+            <Card titulo="Renda" valor={formatarValor(resumo.renda.total)} cor="#16a34a" />
+            <Card titulo="Gastos fixos" valor={formatarValor(resumo.gastosFixos.total)} cor="#dc2626" />
+            <Card titulo="Despesas" valor={formatarValor(resumo.total)} cor="#ea580c" />
+          </div>
+
+          {/* Saldo em destaque */}
           <div
             style={{
-              display: 'flex',
-              gap: 16,
+              padding: 20,
+              borderRadius: 8,
               marginBottom: 24,
-              flexWrap: 'wrap',
+              background: saldoPositivo ? '#ecfdf5' : '#fef2f2',
+              border: `2px solid ${saldoPositivo ? '#16a34a' : '#dc2626'}`,
             }}
           >
-            <Card titulo="Total gasto" valor={formatarValor(resumo.total)} destaque />
-            <Card titulo="Despesas" valor={String(resumo.quantidade)} />
+            <div style={{ fontSize: 14, color: '#666', marginBottom: 6 }}>
+              Saldo do mês (renda − gastos fixos − despesas)
+            </div>
+            <div
+              style={{
+                fontSize: 32,
+                fontWeight: 'bold',
+                color: saldoPositivo ? '#16a34a' : '#dc2626',
+              }}
+            >
+              {formatarValor(saldo)}
+            </div>
+            {!saldoPositivo && (
+              <div style={{ fontSize: 13, color: '#dc2626', marginTop: 6 }}>
+                ⚠️ Você está gastando mais do que ganha neste mês.
+              </div>
+            )}
+          </div>
+
+          {/* Info extra */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+            <Card titulo="Nº de despesas" valor={String(resumo.quantidade)} />
             <Card
               titulo="Categoria que mais gastou"
               valor={maiorCategoria ? maiorCategoria.nome : '—'}
             />
+            <Card
+              titulo="Rendas cadastradas"
+              valor={String(resumo.renda.quantidade)}
+            />
           </div>
 
+          {/* Por categoria */}
           <h3>Gastos por categoria</h3>
           {resumo.porCategoria.length === 0 ? (
             <p>Nenhuma categoria cadastrada.</p>
           ) : (
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {resumo.porCategoria.map((c) => {
-                const pct =
-                  resumo.total > 0 ? (c.total / resumo.total) * 100 : 0;
+                const pct = resumo.total > 0 ? (c.total / resumo.total) * 100 : 0;
                 return (
                   <li
                     key={c.id}
-                    style={{ marginBottom: 12, padding: 8, border: '1px solid #eee', borderRadius: 6 }}
+                    style={{
+                      marginBottom: 12,
+                      padding: 8,
+                      border: '1px solid #eee',
+                      borderRadius: 6,
+                    }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                       <span>
@@ -117,26 +153,11 @@ export default function Dashboard() {
                       </span>
                       <span>
                         {formatarValor(c.total)}{' '}
-                        <span style={{ color: '#888', fontSize: 12 }}>
-                          ({c.quantidade}x)
-                        </span>
+                        <span style={{ color: '#888', fontSize: 12 }}>({c.quantidade}x)</span>
                       </span>
                     </div>
-                    <div
-                      style={{
-                        height: 6,
-                        background: '#eee',
-                        borderRadius: 3,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${pct}%`,
-                          height: '100%',
-                          background: c.cor,
-                        }}
-                      />
+                    <div style={{ height: 6, background: '#eee', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: c.cor }} />
                     </div>
                   </li>
                 );
@@ -144,7 +165,8 @@ export default function Dashboard() {
             </ul>
           )}
 
-          <h3 style={{ marginTop: 32 }}>Últimos 6 meses</h3>
+          {/* Evolução */}
+          <h3 style={{ marginTop: 32 }}>Últimos 6 meses (despesas)</h3>
           {resumo.evolucao.length === 0 ? (
             <p>Sem dados nos últimos 6 meses.</p>
           ) : (
@@ -173,11 +195,11 @@ export default function Dashboard() {
   );
 }
 
-function Card({ titulo, valor, destaque = false }) {
+function Card({ titulo, valor, destaque = false, cor = null }) {
   return (
     <div
       style={{
-        flex: '1 1 180px',
+        flex: '1 1 160px',
         padding: 16,
         border: '1px solid #eee',
         borderRadius: 8,
@@ -187,9 +209,9 @@ function Card({ titulo, valor, destaque = false }) {
       <div style={{ color: '#666', fontSize: 13, marginBottom: 6 }}>{titulo}</div>
       <div
         style={{
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: 'bold',
-          color: destaque ? '#1d4ed8' : '#111',
+          color: cor || (destaque ? '#1d4ed8' : '#111'),
         }}
       >
         {valor}

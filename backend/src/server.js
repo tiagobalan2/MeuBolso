@@ -5,6 +5,8 @@ import './db.js';
 import categoriasRouter from './routes/categorias.js';
 import despesasRouter from './routes/despesas.js';
 import dashboardRouter from './routes/dashboard.js';
+import rendasRouter from './routes/rendas.js';
+import gastosFixosRouter from './routes/gastos-fixos.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +34,8 @@ app.get('/api/me', (req, res) => {
 app.use('/api/categorias', categoriasRouter);
 app.use('/api/despesas', despesasRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/rendas', rendasRouter);
+app.use('/api/gastos-fixos', gastosFixosRouter);
 
 
 // Handler de erro (deve ser o último)

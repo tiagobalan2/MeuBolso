@@ -17,12 +17,10 @@ function requireAuth(req, res, next) {
 router.get('/resumo', requireAuth, async (req, res, next) => {
   try {
     const { mes } = req.query;
-
-    // Se não vier mês, usa o mês atual
     const mesRef = mes || new Date().toISOString().slice(0, 7);
     const dataInicio = `${mesRef}-01`;
 
-    // 1) Totais gerais do mês
+    // 1) Despesas do mês (total, quantidade, por categoria)
     const totalMesQuery = await query(
       `SELECT COALESCE(SUM(valor), 0)::numeric(10,2) AS total,
               COUNT(*) AS quantidade
@@ -33,7 +31,6 @@ router.get('/resumo', requireAuth, async (req, res, next) => {
       [req.userId, dataInicio]
     );
 
-    // 2) Totais por categoria no mês
     const porCategoriaQuery = await query(
       `SELECT c.id, c.nome, c.cor,
               COALESCE(SUM(d.valor), 0)::numeric(10,2) AS total,
@@ -49,7 +46,25 @@ router.get('/resumo', requireAuth, async (req, res, next) => {
       [req.userId, dataInicio]
     );
 
-    // 3) Últimos 6 meses
+    // 2) Renda total do mês
+    const rendaQuery = await query(
+      `SELECT COALESCE(SUM(valor), 0)::numeric(10,2) AS total,
+              COUNT(*) AS quantidade
+       FROM renda
+       WHERE usuario_id = $1 AND mes = $2::date`,
+      [req.userId, dataInicio]
+    );
+
+    // 3) Gastos fixos ativos
+    const gastosFixosQuery = await query(
+      `SELECT COALESCE(SUM(valor), 0)::numeric(10,2) AS total,
+              COUNT(*) AS quantidade
+       FROM gasto_fixo
+       WHERE usuario_id = $1 AND ativo = TRUE`,
+      [req.userId]
+    );
+
+    // 4) Evolução dos últimos 6 meses (só despesas)
     const evolucaoQuery = await query(
       `SELECT to_char(date_trunc('month', data), 'YYYY-MM') AS mes,
               SUM(valor)::numeric(10,2) AS total
@@ -61,10 +76,24 @@ router.get('/resumo', requireAuth, async (req, res, next) => {
       [req.userId, dataInicio]
     );
 
+    const totalDespesas = Number(totalMesQuery.rows[0].total);
+    const totalRenda = Number(rendaQuery.rows[0].total);
+    const totalGastosFixos = Number(gastosFixosQuery.rows[0].total);
+    const saldo = totalRenda - totalGastosFixos - totalDespesas;
+
     res.json({
       mes: mesRef,
-      total: Number(totalMesQuery.rows[0].total),
+      total: totalDespesas,
       quantidade: Number(totalMesQuery.rows[0].quantidade),
+      renda: {
+        total: totalRenda,
+        quantidade: Number(rendaQuery.rows[0].quantidade),
+      },
+      gastosFixos: {
+        total: totalGastosFixos,
+        quantidade: Number(gastosFixosQuery.rows[0].quantidade),
+      },
+      saldo,
       porCategoria: porCategoriaQuery.rows.map((r) => ({
         id: r.id,
         nome: r.nome,
