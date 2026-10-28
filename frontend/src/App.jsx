@@ -3,10 +3,14 @@ import { Show, SignInButton, UserButton } from '@clerk/react';
 import Categorias from './Categorias';
 import Despesas from './Despesas';
 import Dashboard from './Dashboard';
+import Rendas from './Rendas';
+import GastosFixos from './GastosFixos';
 
 const ABAS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'despesas', label: 'Despesas' },
+  { id: 'gastos-fixos', label: 'Gastos fixos' },
+  { id: 'rendas', label: 'Renda' },
   { id: 'categorias', label: 'Categorias' },
 ];
 
@@ -41,9 +45,10 @@ export default function App() {
         <nav
           style={{
             display: 'flex',
-            gap: 8,
+            gap: 4,
             margin: '20px 0',
             borderBottom: '1px solid #ddd',
+            flexWrap: 'wrap',
           }}
         >
           {ABAS.map((a) => (
@@ -51,7 +56,7 @@ export default function App() {
               key={a.id}
               onClick={() => setAba(a.id)}
               style={{
-                padding: '10px 16px',
+                padding: '10px 14px',
                 border: 'none',
                 background: 'none',
                 cursor: 'pointer',
@@ -59,6 +64,7 @@ export default function App() {
                   aba === a.id ? '3px solid #3B82F6' : '3px solid transparent',
                 fontWeight: aba === a.id ? 'bold' : 'normal',
                 color: aba === a.id ? '#3B82F6' : '#555',
+                fontSize: 14,
               }}
             >
               {a.label}
@@ -68,6 +74,8 @@ export default function App() {
 
         {aba === 'dashboard' && <Dashboard />}
         {aba === 'despesas' && <Despesas />}
+        {aba === 'gastos-fixos' && <GastosFixos />}
+        {aba === 'rendas' && <Rendas />}
         {aba === 'categorias' && <Categorias />}
       </Show>
     </div>
