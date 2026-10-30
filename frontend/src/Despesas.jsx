@@ -10,7 +10,6 @@ function formatarValor(valor) {
 }
 
 function formatarData(data) {
-  // data vem como "2026-10-27" ou ISO
   const d = new Date(data);
   return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
@@ -40,7 +39,6 @@ export default function Despesas() {
       const token = await getToken();
       const lista = await apiFetch('/api/categorias', token);
       setCategorias(lista);
-      // Se ainda não escolheu categoria, escolhe a primeira
       if (lista.length > 0 && !categoriaId) {
         setCategoriaId(lista[0].id);
       }
@@ -66,13 +64,8 @@ export default function Despesas() {
     }
   }
 
-  useEffect(() => {
-    carregarCategorias();
-  }, []);
-
-  useEffect(() => {
-    carregarDespesas();
-  }, [filtroMes]);
+  useEffect(() => { carregarCategorias(); }, []);
+  useEffect(() => { carregarDespesas(); }, [filtroMes]);
 
   function limparFormulario() {
     setDescricao('');
@@ -85,12 +78,10 @@ export default function Despesas() {
   async function handleSubmit(e) {
     e.preventDefault();
     setErro('');
-
     if (categorias.length === 0) {
       setErro('Crie uma categoria antes de cadastrar uma despesa.');
       return;
     }
-
     try {
       const token = await getToken();
       const body = {
@@ -99,7 +90,6 @@ export default function Despesas() {
         data,
         categoria_id: categoriaId,
       };
-
       if (editando) {
         await apiFetch(`/api/despesas/${editando}`, token, {
           method: 'PUT',
@@ -111,7 +101,6 @@ export default function Despesas() {
           body: JSON.stringify(body),
         });
       }
-
       limparFormulario();
       await carregarDespesas();
     } catch (e) {
@@ -143,26 +132,36 @@ export default function Despesas() {
 
   return (
     <div>
-      <h2>Minhas despesas</h2>
-
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-
-      {categorias.length === 0 && (
-        <p style={{ color: '#b45309' }}>
-          ⚠️ Você ainda não tem categorias. Vá em "Categorias" e crie uma primeiro.
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Despesas</h2>
+        <p className="text-sm text-gray-500">
+          Registre seus gastos do dia a dia.
         </p>
+      </div>
+
+      {erro && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-lg mb-4">
+          {erro}
+        </div>
       )}
 
+      {categorias.length === 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-3 rounded-lg mb-4">
+          ⚠️ Você ainda não tem categorias. Vá em "Categorias" e crie uma primeiro.
+        </div>
+      )}
+
+      {/* Formulário */}
       <form
         onSubmit={handleSubmit}
-        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}
+        className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center"
       >
         <input
           placeholder="Descrição"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
           required
-          style={{ flex: '1 1 200px' }}
+          className="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="number"
@@ -172,93 +171,107 @@ export default function Despesas() {
           value={valor}
           onChange={(e) => setValor(e.target.value)}
           required
-          style={{ width: 120 }}
+          className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="date"
           value={data}
           onChange={(e) => setData(e.target.value)}
           required
-          style={{ width: 150 }}
+          className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <select
           value={categoriaId}
           onChange={(e) => setCategoriaId(e.target.value)}
           required
-          style={{ width: 160 }}
+          className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
+            <option key={c.id} value={c.id}>{c.nome}</option>
           ))}
         </select>
-        <button type="submit" disabled={categorias.length === 0}>
+        <button
+          type="submit"
+          disabled={categorias.length === 0}
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium px-4 py-2 rounded-lg transition"
+        >
           {editando ? 'Salvar' : 'Adicionar'}
         </button>
         {editando && (
-          <button type="button" onClick={limparFormulario}>
+          <button
+            type="button"
+            onClick={limparFormulario}
+            className="text-gray-500 hover:text-gray-900 text-sm"
+          >
             Cancelar
           </button>
         )}
       </form>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <label>Filtrar por mês:</label>
+      {/* Filtro + total */}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <label className="text-sm text-gray-500">Filtrar por mês:</label>
         <input
           type="month"
           value={filtroMes}
           onChange={(e) => setFiltroMes(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {filtroMes && (
-          <button type="button" onClick={() => setFiltroMes('')}>
+          <button
+            type="button"
+            onClick={() => setFiltroMes('')}
+            className="text-sm text-gray-500 hover:text-gray-900"
+          >
             Limpar
           </button>
         )}
-        <span style={{ marginLeft: 'auto', fontWeight: 'bold' }}>
-          Total: {formatarValor(totalFiltrado)}
+        <span className="ml-auto text-lg font-bold text-gray-900">
+          Total: <span className="text-red-600">{formatarValor(totalFiltrado)}</span>
         </span>
       </div>
 
-      {loading && <p>Carregando...</p>}
+      {loading && <p className="text-gray-500">Carregando...</p>}
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      {/* Lista */}
+      <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
         {despesas.map((d) => (
-          <li
-            key={d.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: 8,
-              borderBottom: '1px solid #eee',
-            }}
-          >
+          <div key={d.id} className="flex items-center gap-3 px-4 py-3">
             <span
-              style={{
-                width: 12,
-                height: 12,
-                background: d.categoria_cor || '#888',
-                borderRadius: 3,
-              }}
+              className="w-3 h-3 rounded"
+              style={{ background: d.categoria_cor || '#888' }}
               title={d.categoria_nome}
             />
-            <span style={{ flex: 1 }}>{d.descricao}</span>
-            <span style={{ width: 110, textAlign: 'right' }}>
+            <span className="flex-1 font-medium text-gray-900">{d.descricao}</span>
+            <span className="w-28 text-right font-bold text-red-600">
               {formatarValor(d.valor)}
             </span>
-            <span style={{ width: 100, textAlign: 'center' }}>
+            <span className="w-24 text-center text-sm text-gray-500">
               {formatarData(d.data)}
             </span>
-            <span style={{ width: 100, color: '#666', fontSize: 14 }}>
+            <span className="w-24 text-sm text-gray-600">
               {d.categoria_nome}
             </span>
-            <button onClick={() => handleEdit(d)}>Editar</button>
-            <button onClick={() => handleDelete(d.id)}>Excluir</button>
-          </li>
+            <button
+              onClick={() => handleEdit(d)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => handleDelete(d.id)}
+              className="text-sm text-red-600 hover:text-red-800"
+            >
+              Excluir
+            </button>
+          </div>
         ))}
-        {!loading && despesas.length === 0 && <li>Nenhuma despesa registrada.</li>}
-      </ul>
+        {!loading && despesas.length === 0 && (
+          <p className="px-4 py-6 text-center text-gray-500 text-sm">
+            Nenhuma despesa registrada.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

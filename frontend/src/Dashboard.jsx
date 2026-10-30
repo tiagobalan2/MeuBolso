@@ -43,9 +43,7 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    carregar();
-  }, [mes]);
+  useEffect(() => { carregar(); }, [mes]);
 
   const maiorCategoria = resumo?.porCategoria?.[0];
   const saldo = resumo?.saldo ?? 0;
@@ -53,61 +51,75 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h2>Resumo do mês</h2>
-
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-
-      <div style={{ marginBottom: 16 }}>
-        <label>Mês: </label>
+      <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+          <p className="text-sm text-gray-500">Resumo do mês</p>
+        </div>
         <input
           type="month"
           value={mes}
           onChange={(e) => setMes(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      {loading && <p>Carregando...</p>}
+      {erro && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-lg mb-4">
+          {erro}
+        </div>
+      )}
+
+      {loading && <p className="text-gray-500">Carregando...</p>}
 
       {resumo && (
         <>
           {/* Cards principais */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-            <Card titulo="Renda" valor={formatarValor(resumo.renda.total)} cor="#16a34a" />
-            <Card titulo="Gastos fixos" valor={formatarValor(resumo.gastosFixos.total)} cor="#dc2626" />
-            <Card titulo="Despesas" valor={formatarValor(resumo.total)} cor="#ea580c" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <Card
+              titulo="Renda"
+              valor={formatarValor(resumo.renda.total)}
+              corTexto="text-green-600"
+            />
+            <Card
+              titulo="Gastos fixos"
+              valor={formatarValor(resumo.gastosFixos.total)}
+              corTexto="text-red-600"
+            />
+            <Card
+              titulo="Despesas"
+              valor={formatarValor(resumo.total)}
+              corTexto="text-orange-600"
+            />
           </div>
 
           {/* Saldo em destaque */}
           <div
-            style={{
-              padding: 20,
-              borderRadius: 8,
-              marginBottom: 24,
-              background: saldoPositivo ? '#ecfdf5' : '#fef2f2',
-              border: `2px solid ${saldoPositivo ? '#16a34a' : '#dc2626'}`,
-            }}
+            className={`rounded-xl p-6 mb-6 border-2 ${
+              saldoPositivo
+                ? 'bg-green-50 border-green-500'
+                : 'bg-red-50 border-red-500'
+            }`}
           >
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 6 }}>
+            <div className="text-sm text-gray-600 mb-1">
               Saldo do mês (renda − gastos fixos − despesas)
             </div>
             <div
-              style={{
-                fontSize: 32,
-                fontWeight: 'bold',
-                color: saldoPositivo ? '#16a34a' : '#dc2626',
-              }}
+              className={`text-4xl font-bold ${
+                saldoPositivo ? 'text-green-600' : 'text-red-600'
+              }`}
             >
               {formatarValor(saldo)}
             </div>
             {!saldoPositivo && (
-              <div style={{ fontSize: 13, color: '#dc2626', marginTop: 6 }}>
+              <div className="text-sm text-red-600 mt-2">
                 ⚠️ Você está gastando mais do que ganha neste mês.
               </div>
             )}
           </div>
 
           {/* Info extra */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <Card titulo="Nº de despesas" valor={String(resumo.quantidade)} />
             <Card
               titulo="Categoria que mais gastou"
@@ -120,74 +132,67 @@ export default function Dashboard() {
           </div>
 
           {/* Por categoria */}
-          <h3>Gastos por categoria</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
+            Gastos por categoria
+          </h3>
           {resumo.porCategoria.length === 0 ? (
-            <p>Nenhuma categoria cadastrada.</p>
+            <p className="text-gray-500 text-sm">Nenhuma categoria cadastrada.</p>
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+            <div className="space-y-3 mb-8">
               {resumo.porCategoria.map((c) => {
                 const pct = resumo.total > 0 ? (c.total / resumo.total) * 100 : 0;
                 return (
-                  <li
+                  <div
                     key={c.id}
-                    style={{
-                      marginBottom: 12,
-                      padding: 8,
-                      border: '1px solid #eee',
-                      borderRadius: 6,
-                    }}
+                    className="bg-white border border-gray-200 rounded-xl p-4"
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span>
+                    <div className="flex justify-between mb-2">
+                      <span className="flex items-center gap-2 font-medium text-gray-900">
                         <span
-                          style={{
-                            display: 'inline-block',
-                            width: 12,
-                            height: 12,
-                            background: c.cor,
-                            borderRadius: 3,
-                            marginRight: 8,
-                          }}
+                          className="w-3 h-3 rounded"
+                          style={{ background: c.cor }}
                         />
                         {c.nome}
                       </span>
-                      <span>
+                      <span className="text-gray-900 font-semibold">
                         {formatarValor(c.total)}{' '}
-                        <span style={{ color: '#888', fontSize: 12 }}>({c.quantidade}x)</span>
+                        <span className="text-gray-400 text-xs font-normal">
+                          ({c.quantidade}x)
+                        </span>
                       </span>
                     </div>
-                    <div style={{ height: 6, background: '#eee', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: c.cor }} />
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${pct}%`, background: c.cor }}
+                      />
                     </div>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           )}
 
           {/* Evolução */}
-          <h3 style={{ marginTop: 32 }}>Últimos 6 meses (despesas)</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
+            Últimos 6 meses (despesas)
+          </h3>
           {resumo.evolucao.length === 0 ? (
-            <p>Sem dados nos últimos 6 meses.</p>
+            <p className="text-gray-500 text-sm">Sem dados nos últimos 6 meses.</p>
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+            <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
               {resumo.evolucao.map((e) => (
-                <li
+                <div
                   key={e.mes}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: 6,
-                    borderBottom: '1px solid #eee',
-                    color: e.mes === mes ? '#3B82F6' : 'inherit',
-                    fontWeight: e.mes === mes ? 'bold' : 'normal',
-                  }}
+                  className={`flex justify-between px-4 py-3 ${
+                    e.mes === mes ? 'text-blue-600 font-bold' : 'text-gray-700'
+                  }`}
                 >
                   <span>{formatarMes(e.mes)}</span>
                   <span>{formatarValor(e.total)}</span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </>
       )}
@@ -195,27 +200,11 @@ export default function Dashboard() {
   );
 }
 
-function Card({ titulo, valor, destaque = false, cor = null }) {
+function Card({ titulo, valor, corTexto = 'text-gray-900' }) {
   return (
-    <div
-      style={{
-        flex: '1 1 160px',
-        padding: 16,
-        border: '1px solid #eee',
-        borderRadius: 8,
-        background: destaque ? '#eff6ff' : '#fafafa',
-      }}
-    >
-      <div style={{ color: '#666', fontSize: 13, marginBottom: 6 }}>{titulo}</div>
-      <div
-        style={{
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: cor || (destaque ? '#1d4ed8' : '#111'),
-        }}
-      >
-        {valor}
-      </div>
+    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div className="text-sm text-gray-500 mb-1">{titulo}</div>
+      <div className={`text-2xl font-bold ${corTexto}`}>{valor}</div>
     </div>
   );
 }

@@ -11,12 +11,10 @@ function formatarValor(valor) {
 
 export default function GastosFixos() {
   const { getToken } = useAuth();
-
   const [gastos, setGastos] = useState([]);
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
   const [diaVencimento, setDiaVencimento] = useState('');
-
   const [editando, setEditando] = useState(null);
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,9 +33,7 @@ export default function GastosFixos() {
     }
   }
 
-  useEffect(() => {
-    carregar();
-  }, []);
+  useEffect(() => { carregar(); }, []);
 
   function limparFormulario() {
     setDescricao('');
@@ -56,19 +52,15 @@ export default function GastosFixos() {
         valor: Number(valor),
         dia_vencimento: diaVencimento ? Number(diaVencimento) : null,
       };
-
       if (editando) {
         await apiFetch(`/api/gastos-fixos/${editando}`, token, {
-          method: 'PUT',
-          body: JSON.stringify(body),
+          method: 'PUT', body: JSON.stringify(body),
         });
       } else {
         await apiFetch('/api/gastos-fixos', token, {
-          method: 'POST',
-          body: JSON.stringify(body),
+          method: 'POST', body: JSON.stringify(body),
         });
       }
-
       limparFormulario();
       await carregar();
     } catch (e) {
@@ -115,23 +107,29 @@ export default function GastosFixos() {
 
   return (
     <div>
-      <h2>Gastos fixos</h2>
-      <p style={{ color: '#666', fontSize: 14 }}>
-        Despesas recorrentes (aluguel, internet, assinaturas) que se repetem todo mês.
-      </p>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Gastos fixos</h2>
+        <p className="text-sm text-gray-500">
+          Despesas recorrentes (aluguel, internet, assinaturas).
+        </p>
+      </div>
 
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+      {erro && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-lg mb-4">
+          {erro}
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}
+        className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center"
       >
         <input
           placeholder="Descrição (ex: Aluguel)"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
           required
-          style={{ flex: '1 1 200px' }}
+          className="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="number"
@@ -141,7 +139,7 @@ export default function GastosFixos() {
           value={valor}
           onChange={(e) => setValor(e.target.value)}
           required
-          style={{ width: 120 }}
+          className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="number"
@@ -150,55 +148,74 @@ export default function GastosFixos() {
           placeholder="Dia venc."
           value={diaVencimento}
           onChange={(e) => setDiaVencimento(e.target.value)}
-          style={{ width: 100 }}
+          className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">{editando ? 'Salvar' : 'Adicionar'}</button>
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition"
+        >
+          {editando ? 'Salvar' : 'Adicionar'}
+        </button>
         {editando && (
-          <button type="button" onClick={limparFormulario}>
+          <button
+            type="button"
+            onClick={limparFormulario}
+            className="text-gray-500 hover:text-gray-900 text-sm"
+          >
             Cancelar
           </button>
         )}
       </form>
 
-      <div style={{ marginBottom: 12, fontWeight: 'bold' }}>
-        Total mensal (ativos): {formatarValor(totalAtivos)}
+      <div className="mb-4 text-lg font-bold text-gray-900">
+        Total mensal (ativos): <span className="text-red-600">{formatarValor(totalAtivos)}</span>
       </div>
 
-      {loading && <p>Carregando...</p>}
+      {loading && <p className="text-gray-500">Carregando...</p>}
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
         {gastos.map((g) => (
-          <li
+          <div
             key={g.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: 8,
-              borderBottom: '1px solid #eee',
-              opacity: g.ativo ? 1 : 0.5,
-            }}
+            className={`flex items-center gap-3 px-4 py-3 ${g.ativo ? '' : 'opacity-50'}`}
           >
-            <span style={{ flex: 1 }}>
+            <span className="flex-1 font-medium text-gray-900">
               {g.descricao}
               {g.dia_vencimento && (
-                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>
+                <span className="text-gray-400 text-sm ml-2">
                   (vence dia {g.dia_vencimento})
                 </span>
               )}
             </span>
-            <span style={{ width: 120, textAlign: 'right', color: '#dc2626', fontWeight: 'bold' }}>
+            <span className="w-32 text-right font-bold text-red-600">
               {formatarValor(g.valor)}
             </span>
-            <button onClick={() => handleToggleAtivo(g)}>
+            <button
+              onClick={() => handleToggleAtivo(g)}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               {g.ativo ? 'Desativar' : 'Ativar'}
             </button>
-            <button onClick={() => handleEdit(g)}>Editar</button>
-            <button onClick={() => handleDelete(g.id)}>Excluir</button>
-          </li>
+            <button
+              onClick={() => handleEdit(g)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => handleDelete(g.id)}
+              className="text-sm text-red-600 hover:text-red-800"
+            >
+              Excluir
+            </button>
+          </div>
         ))}
-        {!loading && gastos.length === 0 && <li>Nenhum gasto fixo cadastrado.</li>}
-      </ul>
+        {!loading && gastos.length === 0 && (
+          <p className="px-4 py-6 text-center text-gray-500 text-sm">
+            Nenhum gasto fixo cadastrado.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
