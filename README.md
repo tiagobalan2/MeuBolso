@@ -250,7 +250,4 @@ Este projeto foi desenvolvido para fins acadêmicos. Sinta-se livre para estudar
 
 ---
 
-## 🙏 Agradecimentos
-
-- Prof. Fernando Nakagawa (Unifil)
 - Documentação do [Clerk](https://clerk.com/docs), [Express](https://expressjs.com/) e [PostgreSQL](https://www.postgresql.org/docs/)
