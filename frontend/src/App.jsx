@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { Show, SignInButton, UserButton } from '@clerk/react';
+import {
+  BarChart3, ChevronRight, CircleDollarSign, CreditCard,
+  LayoutDashboard, LogIn, Menu, PiggyBank, Tags, WalletCards, X,
+} from 'lucide-react';
 import Categorias from './Categorias';
 import Despesas from './Despesas';
 import Dashboard from './Dashboard';
@@ -7,82 +11,72 @@ import Rendas from './Rendas';
 import GastosFixos from './GastosFixos';
 
 const ABAS = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'despesas', label: 'Despesas' },
-  { id: 'gastos-fixos', label: 'Gastos fixos' },
-  { id: 'rendas', label: 'Renda' },
-  { id: 'categorias', label: 'Categorias' },
+  { id: 'dashboard', label: 'Visão geral', icon: LayoutDashboard },
+  { id: 'despesas', label: 'Despesas', icon: CreditCard },
+  { id: 'gastos-fixos', label: 'Gastos fixos', icon: BarChart3 },
+  { id: 'rendas', label: 'Renda', icon: PiggyBank },
+  { id: 'categorias', label: 'Categorias', icon: Tags },
 ];
 
 export default function App() {
   const [aba, setAba] = useState('dashboard');
+  const [menuAberto, setMenuAberto] = useState(false);
+
+  function selecionarAba(id) {
+    setAba(id);
+    setMenuAberto(false);
+  }
 
   return (
-    <div className="min-h-screen bg-[#faf8f5]">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">
-            💰 MeuBolso
-          </h1>
-
-          <Show when="signed-in">
-            <UserButton afterSignOutUrl="/" />
-          </Show>
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition">
-                Entrar
-              </button>
-            </SignInButton>
-          </Show>
-        </div>
-      </header>
-
-      {/* Conteúdo */}
+    <div className="app-shell">
       <Show when="signed-out">
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Controle suas despesas de forma simples
-          </h2>
-          <p className="text-gray-500 max-w-md mx-auto mb-8">
-            Registre seus gastos, acompanhe o saldo do mês e descubra para onde
-            seu dinheiro está indo.
-          </p>
-          <SignInButton mode="modal">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition">
-              Começar agora
-            </button>
-          </SignInButton>
+        <div className="landing-page">
+          <div className="landing-orb landing-orb-one" /><div className="landing-orb landing-orb-two" />
+          <header className="landing-header">
+            <div className="brand-mark"><CircleDollarSign size={22} /></div>
+            <span>Meu<span>Bolso</span></span>
+            <SignInButton mode="modal"><button className="button button-ghost">Entrar <LogIn size={16} /></button></SignInButton>
+          </header>
+          <main className="landing-content">
+            <div className="eyebrow"><span /> ORGANIZE. PLANEJE. VIVA.</div>
+            <h1>Seu dinheiro,<br /><em>no controle.</em></h1>
+            <p>Uma visão clara das suas finanças para você tomar decisões melhores todos os meses.</p>
+            <SignInButton mode="modal"><button className="button button-primary button-large">Começar agora <ChevronRight size={18} /></button></SignInButton>
+            <div className="landing-proof"><div className="proof-avatars"><span>✓</span><span>✓</span><span>✓</span></div><span>Feito para deixar sua vida mais leve</span></div>
+          </main>
+          <div className="landing-card">
+            <div className="mock-card-header"><span>Saldo disponível</span><CircleDollarSign size={18} /></div>
+            <strong>R$ 4.280,50</strong>
+            <div className="mock-chart"><i /><i /><i /><i /><i /><i /><i /></div>
+            <div className="mock-card-footer"><span>+12,8% este mês</span><span>↗</span></div>
+          </div>
         </div>
       </Show>
 
       <Show when="signed-in">
-        <div className="max-w-5xl mx-auto px-4">
-          {/* Abas */}
-          <nav className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+        <button className="mobile-menu-button" onClick={() => setMenuAberto((aberto) => !aberto)} aria-label="Abrir menu">
+          {menuAberto ? <X size={21} /> : <Menu size={21} />}
+        </button>
+        <aside className={`sidebar ${menuAberto ? 'sidebar-open' : ''}`}>
+          <div className="sidebar-brand"><div className="brand-mark"><CircleDollarSign size={21} /></div><span>Meu<span>Bolso</span></span></div>
+          <div className="sidebar-label">MENU PRINCIPAL</div>
+          <nav className="sidebar-nav">
             {ABAS.map((a) => (
               <button
                 key={a.id}
-                onClick={() => setAba(a.id)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                  aba === a.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-900'
-                }`}
+                onClick={() => selecionarAba(a.id)}
+                className={`sidebar-link ${aba === a.id ? 'sidebar-link-active' : ''}`}
               >
-                {a.label}
+                <a.icon size={18} strokeWidth={aba === a.id ? 2.4 : 2} /><span>{a.label}</span>
               </button>
             ))}
           </nav>
-
-          {/* Conteúdo da aba */}
-          <main className="pb-16">
-            {aba === 'dashboard' && <Dashboard />}
-            {aba === 'despesas' && <Despesas />}
-            {aba === 'gastos-fixos' && <GastosFixos />}
-            {aba === 'rendas' && <Rendas />}
-            {aba === 'categorias' && <Categorias />}
+          <div className="sidebar-bottom"><div className="sidebar-tip"><WalletCards size={18} /><span>Cuide bem do<br /><b>seu futuro.</b></span></div><Show when="signed-in"><UserButton afterSignOutUrl="/" /></Show></div>
+        </aside>
+        <div className="main-area">
+          <header className="topbar"><div><span className="topbar-overline">MEU ESPAÇO FINANCEIRO</span><h1>{ABAS.find((a) => a.id === aba)?.label}</h1></div><div className="topbar-user"><span className="topbar-date">Hoje, {new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date())}</span><Show when="signed-in"><UserButton afterSignOutUrl="/" /></Show></div></header>
+          <main className="content-area">
+            {aba === 'dashboard' && <Dashboard />}{aba === 'despesas' && <Despesas />}{aba === 'gastos-fixos' && <GastosFixos />}{aba === 'rendas' && <Rendas />}{aba === 'categorias' && <Categorias />}
           </main>
         </div>
       </Show>

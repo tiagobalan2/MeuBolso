@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/react';
-import { apiFetch } from './api';
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/react";
+import { apiFetch } from "./api";
 
 function formatarValor(valor) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   }).format(Number(valor));
 }
 
 function formatarMes(mesIso) {
-  const [ano, m] = mesIso.slice(0, 7).split('-');
+  const [ano, m] = mesIso.slice(0, 7).split("-");
   const nomes = [
-    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
   ];
   return `${nomes[Number(m) - 1]}/${ano}`;
 }
@@ -23,25 +23,24 @@ function mesAtual() {
 }
 
 export default function Rendas() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [rendas, setRendas] = useState([]);
-  const [descricao, setDescricao] = useState('');
-  const [valor, setValor] = useState('');
+  const [descricao, setDescricao] = useState("");
+  const [valor, setValor] = useState("");
   const [mes, setMes] = useState(mesAtual());
   const [editando, setEditando] = useState(null);
-  const [filtroMes, setFiltroMes] = useState('');
-  const [erro, setErro] = useState('');
+  const [filtroMes, setFiltroMes] = useState("");
+  const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function carregar() {
     setLoading(true);
-    setErro('');
+    setErro("");
     try {
-      const token = await getToken();
       const params = new URLSearchParams();
-      if (filtroMes) params.set('mes', filtroMes);
+      if (filtroMes) params.set("mes", filtroMes);
       const qs = params.toString();
-      const lista = await apiFetch(`/api/rendas${qs ? `?${qs}` : ''}`, token);
+      const lista = await apiFetch(`/api/rendas${qs ? `?${qs}` : ""}`, getToken);
       setRendas(lista);
     } catch (e) {
       setErro(e.message);
@@ -50,28 +49,31 @@ export default function Rendas() {
     }
   }
 
-  useEffect(() => { carregar(); }, [filtroMes]);
+  useEffect(() => {
+    if (isLoaded && isSignedIn) carregar();
+  }, [isLoaded, isSignedIn, filtroMes]);
 
   function limparFormulario() {
-    setDescricao('');
-    setValor('');
+    setDescricao("");
+    setValor("");
     setMes(mesAtual());
     setEditando(null);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setErro('');
+    setErro("");
     try {
-      const token = await getToken();
       const body = { descricao: descricao.trim(), valor: Number(valor), mes };
       if (editando) {
-        await apiFetch(`/api/rendas/${editando}`, token, {
-          method: 'PUT', body: JSON.stringify(body),
+        await apiFetch(`/api/rendas/${editando}`, getToken, {
+          method: "PUT",
+          body: JSON.stringify(body),
         });
       } else {
-        await apiFetch('/api/rendas', token, {
-          method: 'POST', body: JSON.stringify(body),
+        await apiFetch("/api/rendas", getToken, {
+          method: "POST",
+          body: JSON.stringify(body),
         });
       }
       limparFormulario();
@@ -82,11 +84,10 @@ export default function Rendas() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Excluir esta renda?')) return;
-    setErro('');
+    if (!confirm("Excluir esta renda?")) return;
+    setErro("");
     try {
-      const token = await getToken();
-      await apiFetch(`/api/rendas/${id}`, token, { method: 'DELETE' });
+      await apiFetch(`/api/rendas/${id}`, getToken, { method: "DELETE" });
       await carregar();
     } catch (e) {
       setErro(e.message);
@@ -149,7 +150,7 @@ export default function Rendas() {
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition"
         >
-          {editando ? 'Salvar' : 'Adicionar'}
+          {editando ? "Salvar" : "Adicionar"}
         </button>
         {editando && (
           <button
@@ -173,14 +174,15 @@ export default function Rendas() {
         {filtroMes && (
           <button
             type="button"
-            onClick={() => setFiltroMes('')}
+            onClick={() => setFiltroMes("")}
             className="text-sm text-gray-500 hover:text-gray-900"
           >
             Limpar
           </button>
         )}
         <span className="ml-auto text-lg font-bold text-gray-900">
-          Total: <span className="text-green-600">{formatarValor(total)}</span>
+          Total:{" "}
+          <span className="text-green-600">{formatarValor(total)}</span>
         </span>
       </div>
 
@@ -189,7 +191,9 @@ export default function Rendas() {
       <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
         {rendas.map((r) => (
           <div key={r.id} className="flex items-center gap-3 px-4 py-3">
-            <span className="flex-1 font-medium text-gray-900">{r.descricao}</span>
+            <span className="flex-1 font-medium text-gray-900">
+              {r.descricao}
+            </span>
             <span className="w-32 text-right font-bold text-green-600">
               {formatarValor(r.valor)}
             </span>

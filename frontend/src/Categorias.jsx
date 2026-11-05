@@ -3,7 +3,7 @@ import { useAuth } from "@clerk/react";
 import { apiFetch } from "./api";
 
 export default function Categorias() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [categorias, setCategorias] = useState([]);
   const [nome, setNome] = useState("");
   const [cor, setCor] = useState("#3B82F6");
@@ -15,8 +15,7 @@ export default function Categorias() {
     setLoading(true);
     setErro("");
     try {
-      const token = await getToken();
-      const lista = await apiFetch("/api/categorias", token);
+      const lista = await apiFetch("/api/categorias", getToken);
       setCategorias(lista);
     } catch (e) {
       setErro(e.message);
@@ -26,21 +25,20 @@ export default function Categorias() {
   }
 
   useEffect(() => {
-    carregar();
-  }, []);
+    if (isLoaded && isSignedIn) carregar();
+  }, [isLoaded, isSignedIn]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setErro("");
     try {
-      const token = await getToken();
       if (editando) {
-        await apiFetch(`/api/categorias/${editando}`, token, {
+        await apiFetch(`/api/categorias/${editando}`, getToken, {
           method: "PUT",
           body: JSON.stringify({ nome, cor }),
         });
       } else {
-        await apiFetch("/api/categorias", token, {
+        await apiFetch("/api/categorias", getToken, {
           method: "POST",
           body: JSON.stringify({ nome, cor }),
         });
@@ -58,8 +56,7 @@ export default function Categorias() {
     if (!confirm("Excluir esta categoria?")) return;
     setErro("");
     try {
-      const token = await getToken();
-      await apiFetch(`/api/categorias/${id}`, token, { method: "DELETE" });
+      await apiFetch(`/api/categorias/${id}`, getToken, { method: "DELETE" });
       await carregar();
     } catch (e) {
       setErro(e.message);
@@ -89,7 +86,6 @@ export default function Categorias() {
         </div>
       )}
 
-      {/* Formulário */}
       <form
         onSubmit={handleSubmit}
         className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center"
@@ -131,7 +127,6 @@ export default function Categorias() {
 
       {loading && <p className="text-gray-500">Carregando...</p>}
 
-      {/* Lista */}
       <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
         {categorias.map((c) => (
           <div key={c.id} className="flex items-center gap-3 px-4 py-3">

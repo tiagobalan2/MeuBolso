@@ -1,12 +1,13 @@
-const API_URL = 'http://localhost:3001';
+const API_URL = "http://localhost:3001";
 
-// O token do Clerk é obtido dentro dos componentes.
-// Esta função recebe o token e o endpoint, e faz a chamada.
-export async function apiFetch(path, token, options = {}) {
+export async function apiFetch(path, getToken, options = {}) {
+  // Força a renovação do token, ignorando o cache que pode estar expirado
+  const token = await getToken({ skipCache: true });
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
       ...(options.headers || {}),
     },

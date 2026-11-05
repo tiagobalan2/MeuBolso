@@ -1,30 +1,29 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/react';
-import { apiFetch } from './api';
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/react";
+import { apiFetch } from "./api";
 
 function formatarValor(valor) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   }).format(Number(valor));
 }
 
 export default function GastosFixos() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [gastos, setGastos] = useState([]);
-  const [descricao, setDescricao] = useState('');
-  const [valor, setValor] = useState('');
-  const [diaVencimento, setDiaVencimento] = useState('');
+  const [descricao, setDescricao] = useState("");
+  const [valor, setValor] = useState("");
+  const [diaVencimento, setDiaVencimento] = useState("");
   const [editando, setEditando] = useState(null);
-  const [erro, setErro] = useState('');
+  const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function carregar() {
     setLoading(true);
-    setErro('');
+    setErro("");
     try {
-      const token = await getToken();
-      const lista = await apiFetch('/api/gastos-fixos', token);
+      const lista = await apiFetch("/api/gastos-fixos", getToken);
       setGastos(lista);
     } catch (e) {
       setErro(e.message);
@@ -33,32 +32,35 @@ export default function GastosFixos() {
     }
   }
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    if (isLoaded && isSignedIn) carregar();
+  }, [isLoaded, isSignedIn]);
 
   function limparFormulario() {
-    setDescricao('');
-    setValor('');
-    setDiaVencimento('');
+    setDescricao("");
+    setValor("");
+    setDiaVencimento("");
     setEditando(null);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setErro('');
+    setErro("");
     try {
-      const token = await getToken();
       const body = {
         descricao: descricao.trim(),
         valor: Number(valor),
         dia_vencimento: diaVencimento ? Number(diaVencimento) : null,
       };
       if (editando) {
-        await apiFetch(`/api/gastos-fixos/${editando}`, token, {
-          method: 'PUT', body: JSON.stringify(body),
+        await apiFetch(`/api/gastos-fixos/${editando}`, getToken, {
+          method: "PUT",
+          body: JSON.stringify(body),
         });
       } else {
-        await apiFetch('/api/gastos-fixos', token, {
-          method: 'POST', body: JSON.stringify(body),
+        await apiFetch("/api/gastos-fixos", getToken, {
+          method: "POST",
+          body: JSON.stringify(body),
         });
       }
       limparFormulario();
@@ -69,11 +71,10 @@ export default function GastosFixos() {
   }
 
   async function handleToggleAtivo(g) {
-    setErro('');
+    setErro("");
     try {
-      const token = await getToken();
-      await apiFetch(`/api/gastos-fixos/${g.id}`, token, {
-        method: 'PUT',
+      await apiFetch(`/api/gastos-fixos/${g.id}`, getToken, {
+        method: "PUT",
         body: JSON.stringify({ ativo: !g.ativo }),
       });
       await carregar();
@@ -83,11 +84,10 @@ export default function GastosFixos() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Excluir este gasto fixo?')) return;
-    setErro('');
+    if (!confirm("Excluir este gasto fixo?")) return;
+    setErro("");
     try {
-      const token = await getToken();
-      await apiFetch(`/api/gastos-fixos/${id}`, token, { method: 'DELETE' });
+      await apiFetch(`/api/gastos-fixos/${id}`, getToken, { method: "DELETE" });
       await carregar();
     } catch (e) {
       setErro(e.message);
@@ -98,7 +98,7 @@ export default function GastosFixos() {
     setEditando(g.id);
     setDescricao(g.descricao);
     setValor(String(g.valor));
-    setDiaVencimento(g.dia_vencimento ? String(g.dia_vencimento) : '');
+    setDiaVencimento(g.dia_vencimento ? String(g.dia_vencimento) : "");
   }
 
   const totalAtivos = gastos
@@ -154,7 +154,7 @@ export default function GastosFixos() {
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition"
         >
-          {editando ? 'Salvar' : 'Adicionar'}
+          {editando ? "Salvar" : "Adicionar"}
         </button>
         {editando && (
           <button
@@ -168,7 +168,8 @@ export default function GastosFixos() {
       </form>
 
       <div className="mb-4 text-lg font-bold text-gray-900">
-        Total mensal (ativos): <span className="text-red-600">{formatarValor(totalAtivos)}</span>
+        Total mensal (ativos):{" "}
+        <span className="text-red-600">{formatarValor(totalAtivos)}</span>
       </div>
 
       {loading && <p className="text-gray-500">Carregando...</p>}
@@ -177,7 +178,9 @@ export default function GastosFixos() {
         {gastos.map((g) => (
           <div
             key={g.id}
-            className={`flex items-center gap-3 px-4 py-3 ${g.ativo ? '' : 'opacity-50'}`}
+            className={`flex items-center gap-3 px-4 py-3 ${
+              g.ativo ? "" : "opacity-50"
+            }`}
           >
             <span className="flex-1 font-medium text-gray-900">
               {g.descricao}
@@ -194,7 +197,7 @@ export default function GastosFixos() {
               onClick={() => handleToggleAtivo(g)}
               className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {g.ativo ? 'Desativar' : 'Ativar'}
+              {g.ativo ? "Desativar" : "Ativar"}
             </button>
             <button
               onClick={() => handleEdit(g)}
