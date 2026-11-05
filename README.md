@@ -36,9 +36,9 @@ Projeto desenvolvido para a disciplina de **Projeto de Desenvolvimento de Softwa
 - 📅 **Filtros por mês** em despesas, rendas e dashboard
 - 🔒 **Isolamento de dados** — cada usuário vê apenas os próprios registros
 
-## 2. Requisitos
+## Requisitos
 
-### 2.1. Requisitos Funcionais (RF)
+### Requisitos Funcionais (RF)
 
 Os requisitos funcionais descrevem o que o sistema deve fazer, ou seja, as funcionalidades que o usuário pode executar.
 
@@ -57,7 +57,7 @@ Os requisitos funcionais descrevem o que o sistema deve fazer, ou seja, as funci
 | **RF11** | O sistema deve calcular e exibir o saldo do mês (Renda - Gastos Fixos - Despesas). | Essencial |
 ---
 
-### 2.2. Requisitos Não Funcionais (RNF)
+### Requisitos Não Funcionais (RNF)
 
 Os requisitos não funcionais descrevem **como** o sistema deve se comportar, abordando critérios de qualidade, segurança e restrições técnicas.
 
