@@ -36,6 +36,41 @@ Projeto desenvolvido para a disciplina de **Projeto de Desenvolvimento de Softwa
 - 📅 **Filtros por mês** em despesas, rendas e dashboard
 - 🔒 **Isolamento de dados** — cada usuário vê apenas os próprios registros
 
+## 2. Requisitos
+
+### 2.1. Requisitos Funcionais (RF)
+
+Os requisitos funcionais descrevem o que o sistema deve fazer, ou seja, as funcionalidades que o usuário pode executar.
+
+| ID | Requisito | Prioridade |
+| :--- | :--- | :--- |
+| **RF01** | O sistema deve permitir que o usuário se cadastre e faça login (via e-mail ou Google) utilizando a plataforma Clerk. | Essencial |
+| **RF02** | O sistema deve permitir que o usuário crie, leia, edite e exclua **categorias**, personalizando nome e cor. | Essencial |
+| **RF03** | O sistema deve permitir que o usuário crie, leia, edite e exclua **despesas** variáveis, informando descrição, valor, data e categoria. | Essencial |
+| **RF04** | O sistema deve permitir que o usuário crie, leia, edite e exclua **rendas** mensais, permitindo múltiplas fontes de receita no mesmo mês. | Essencial |
+| **RF05** | O sistema deve permitir que o usuário crie, leia, edite e exclua **gastos fixos**, informando descrição, valor e dia de vencimento. | Essencial |
+| **RF06** | O sistema deve permitir que o usuário ative ou desative um gasto fixo sem precisar excluí-lo. | Importante |
+| **RF07** | O sistema deve permitir filtrar despesas e rendas por mês específico. | Importante |
+| **RF08** | O sistema deve calcular e exibir no Dashboard o total de rendas do mês selecionado. | Essencial |
+| **RF09** | O sistema deve calcular e exibir no Dashboard o total de gastos fixos ativos. | Essencial |
+| **RF10** | O sistema deve calcular e exibir no Dashboard o total de despesas variáveis do mês selecionado. | Essencial |
+| **RF11** | O sistema deve calcular e exibir o saldo do mês (Renda - Gastos Fixos - Despesas). | Essencial |
+---
+
+### 2.2. Requisitos Não Funcionais (RNF)
+
+Os requisitos não funcionais descrevem **como** o sistema deve se comportar, abordando critérios de qualidade, segurança e restrições técnicas.
+
+| ID | Requisito | Categoria |
+| :--- | :--- | :--- |
+| **RNF01** | A interface deve ser responsiva, adaptando-se a telas de celulares, tablets e desktops (utilizando Tailwind CSS). | Usabilidade |
+| **RNF02** | A autenticação e o gerenciamento de senhas devem ser delegados inteiramente ao Clerk (nenhuma senha é armazenada no banco local). | Segurança |
+| **RNF03** | O isolamento de dados deve ser garantido no nível de banco de dados, garantindo que um usuário nunca acesse dados de outro (`WHERE usuario_id = $1`). | Segurança |
+| **RNF04** | A API deve responder às requisições de listagem (GET) em menos de 2 segundos. | Desempenho |
+| **RNF05** | O sistema deve utilizar o PostgreSQL como banco de dados relacional, garantindo integridade referencial via chaves estrangeiras. | Confiabilidade |
+| **RNF06** | O sistema deve ser compatível com os principais navegadores modernos (Chrome, Firefox, Edge, Safari). | Compatibilidade |
+| **RNF07** | O projeto deve ser facilmente executável em ambiente local seguindo as instruções do README. | Manutenibilidade |
+
 ---
 
 ## 🛠 Stack Tecnológica
